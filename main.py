@@ -77,6 +77,8 @@ def cmd_generate(config: dict[str, Any]) -> int:
         "source_count": len(enabled_sources(config)),
         "raw_count": len(raw_items),
         "deduped_count": len(deduped),
+        "llm_available": ranker.available,
+        "llm_model": ranker.model if ranker.available else "未配置",
     }
     markdown, recommendations = render_review_markdown(date_str, ranked, stats, config)
     review_path = Path(app.get("review_dir", "review")) / f"{date_file}.md"

@@ -106,6 +106,8 @@ class WeComPublisher:
         if send_news:
             news_ok, msg = self.send_news(articles)
             messages.append(("WARNING: " if not news_ok and markdown_ok else "") + msg)
+        if self.mode not in {"markdown_only", "news_only", "markdown_plus_news"}:
+            return False, False, messages + [f"unsupported wecom mode: {self.mode}"]
         overall = (markdown_ok and news_ok) if self.mode == "news_only" else markdown_ok
         if self.mode == "markdown_plus_news":
             overall = markdown_ok

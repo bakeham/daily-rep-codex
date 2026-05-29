@@ -4,7 +4,10 @@ import json
 import re
 from typing import Any
 
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except Exception:  # pragma: no cover - dependency may be absent before install
+    OpenAI = None  # type: ignore[assignment]
 
 from src.core.filter import is_qa_related, rule_score_item
 from src.core.utils import clean_html, clamp
@@ -95,9 +98,12 @@ class LlmRanker:
 
     @property
     def available(self) -> bool:
-        return self.enabled and bool(self.base_url and self.api_key and self.model and not self.api_key.startswith("${"))
+        values = (self.base_url, self.api_key, self.model)
+        return self.enabled and OpenAI is not None and all(v and not str(v).startswith("${") for v in values)
 
-    def _client(self) -> OpenAI:
+    def _client(self) -> "OpenAI":
+        if OpenAI is None:
+            raise RuntimeError("openai dependency is not installed")
         return OpenAI(base_url=self.base_url, api_key=self.api_key, timeout=self.timeout)
 
     def rank_one(self, item: NewsItem) -> RankedNewsItem:

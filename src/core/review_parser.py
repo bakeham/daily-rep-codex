@@ -30,9 +30,12 @@ def _section(text: str, heading: str) -> str:
     return text[start:end]
 
 
-def _field(block: str, name: str) -> str:
-    match = re.search(rf"^-\s*{re.escape(name)}：\s*(.*)$", block, flags=re.M)
-    return match.group(1).strip() if match else ""
+def _field(block: str, *names: str) -> str:
+    for name in names:
+        match = re.search(rf"^-\s*{re.escape(name)}\s*[：:]\s*(.*)$", block, flags=re.M)
+        if match:
+            return match.group(1).strip()
+    return ""
 
 
 def _float(value: str) -> float:
@@ -54,21 +57,21 @@ def parse_review_articles(markdown: str) -> list[ReviewArticle]:
         url = _field(block, "原文链接")
         if not title or not url:
             continue
-        qa_text = _field(block, "是否测试工程师相关 qa_related")
+        qa_text = _field(block, "是否测试工程师相关 qa_related", "是否测试工程师相关")
         articles.append(
             ReviewArticle(
                 title=title,
                 url=url,
                 source=_field(block, "来源"),
                 category=_field(block, "分类"),
-                rule_score=_float(_field(block, "规则分 rule_score")),
-                llm_score=_float(_field(block, "LLM 分 llm_score")),
-                final_score=_float(_field(block, "最终分 final_score")),
+                rule_score=_float(_field(block, "规则分 rule_score", "规则分")),
+                llm_score=_float(_field(block, "LLM 分 llm_score", "LLM 分")),
+                final_score=_float(_field(block, "最终分 final_score", "最终分")),
                 qa_related=qa_text.lower() in {"是", "true", "yes", "y", "1"},
-                reason=_field(block, "推荐理由"),
+                reason=_field(block, "推荐理由", "过滤原因"),
                 summary=_field(block, "摘要"),
-                action_suggestion=_field(block, "对我的参考价值"),
-                image_url=_field(block, "图片链接 image_url"),
+                action_suggestion=_field(block, "对我的参考价值", "参考价值"),
+                image_url=_field(block, "图片链接 image_url", "图片链接"),
             )
         )
     return articles
