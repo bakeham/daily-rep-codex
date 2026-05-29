@@ -1,0 +1,114 @@
+app:
+  timezone: Asia/Shanghai
+  review_dir: review
+  state_path: data/state.json
+  max_items_per_source: 50
+  final_top_n: 8
+  require_qa_related: true
+
+llm:
+  enabled: true
+  provider: openai_compatible
+  base_url: ${OPENAI_BASE_URL}
+  api_key: ${OPENAI_API_KEY}
+  model: ${OPENAI_MODEL}
+  temperature: 0.2
+  timeout_seconds: 60
+  rule_score_weight: 0.4
+  llm_score_weight: 0.6
+
+wecom:
+  webhook_url: ${WECOM_WEBHOOK_URL}
+
+  # 企业微信推送模式：
+  # markdown_only：只发送 Markdown 摘要
+  # news_only：只发送 News 图文卡片
+  # markdown_plus_news：先发送 Markdown 摘要，再发送 News 图文卡片
+  mode: markdown_plus_news
+
+  send_markdown: true
+  send_news: true
+
+  # 每天推荐 3 篇日报
+  news_top_n: 3
+
+  # News 图文卡片描述不要太长
+  news_description_max_chars: 120
+
+  # 可选：没有文章图片时使用默认图
+  default_picurl: ""
+
+  # Markdown 分片阈值，按企业微信实际限制和测试效果调整
+  markdown_chunk_max_chars: 1800
+
+sources:
+  - name: juya_ai_daily
+    type: rss
+    enabled: true
+    url: https://imjuya.github.io/juya-ai-daily/rss.xml
+    description: 橘鸦 AI 早报 RSS
+
+  - name: aihot_selected
+    type: rest
+    enabled: true
+    url: https://aihot.virxact.com/api/public/items
+    description: AI HOT selected items。openapi schema 位于 https://aihot.virxact.com/openapi.yaml；openapi.yaml 是 API schema，实际采集接口应配置为 /api/public/items 或其他公开 endpoint。
+    method: GET
+    headers:
+      User-Agent: "Mozilla/5.0"
+      Accept: "application/json"
+    params:
+      mode: selected
+      take: 50
+
+filters:
+  include_keywords:
+    - AI Coding
+    - Codex
+    - Claude Code
+    - opencode
+    - Cursor
+    - Kiro
+    - Agent
+    - MCP
+    - tool calling
+    - memory
+    - RAG
+    - GraphRAG
+    - DBT
+    - DSL
+    - data quality
+    - testing
+    - QA
+    - test case
+    - test automation
+    - 测试
+    - 测试工程师
+    - 测试用例
+    - 测试自动化
+    - 需求评审
+    - 数据质量
+    - 数据校验
+    - 大数据测试
+
+  qa_keywords:
+    - testing
+    - QA
+    - quality assurance
+    - test case
+    - test generation
+    - test automation
+    - unit test
+    - integration test
+    - data quality
+    - data validation
+    - requirements review
+    - 测试
+    - 测试工程师
+    - 测试用例
+    - 测试自动化
+    - 需求评审
+    - 数据质量
+    - 数据校验
+    - 大数据测试
+    - LLM 辅助测试
